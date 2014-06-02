@@ -37,7 +37,7 @@
 #include "../../../../drivers/video/msm/mdp_hw.h"
 
 extern int panel_type;
-static int mipi_power_save_on = 1;
+int init_pico = 0;
 
 void mdp_color_enhancement(struct mdp_reg *reg_seq, int size);
 
@@ -68,8 +68,8 @@ struct mdp_reg pico_color_enhancement[] = {
 
 int pico_mdp_color_enhancement(void)
 {
+	PR_DISP_INFO("%s\n",__func__);
 	mdp_color_enhancement(pico_color_enhancement, ARRAY_SIZE(pico_color_enhancement));
-	
 	return 0;
 }
 
@@ -99,13 +99,15 @@ static void pico_panel_power(int on)
 static int mipi_panel_power(int on)
 {
 	int flag_on = !!on;
+	static int mipi_power_save_on = 1;
 
 	if (mipi_power_save_on == flag_on)
 		return 0;
 
 	mipi_power_save_on = flag_on;
 
-	pico_panel_power(on);	
+	if (init_pico != 0)
+		pico_panel_power(on);
 
 	return 0;
 }
@@ -128,11 +130,10 @@ static struct mipi_dsi_platform_data mipi_dsi_pdata = {
 	.vsync_gpio		= 97,
 	.dsi_power_save		= mipi_panel_power,
 	.get_lane_config	= msm_fb_get_lane_config,
-	.dlane_swap 		= 0x01,
 };
 
 #define BRI_SETTING_MIN                 30
-#define BRI_SETTING_DEF                 142
+#define BRI_SETTING_DEF                 143
 #define BRI_SETTING_MAX                 255
 
 static unsigned char pico_shrink_pwm(int val)
@@ -163,6 +164,7 @@ static unsigned char pico_shrink_pwm(int val)
 	} else if (val > BRI_SETTING_MAX)
 			shrink_br = pwm_max;
 
+	//PR_DISP_INFO("brightness orig=%d, transformed=%d\n", val, shrink_br);
 
 	return shrink_br;
 }
@@ -216,7 +218,6 @@ static struct platform_device msm_fb_device = {
 };
 
 static struct msm_panel_common_pdata mdp_pdata = {
-	.cont_splash_enabled = 0x00,
 	.gpio = 97,
 	.mdp_rev = MDP_REV_303,
 	.mdp_color_enhance = pico_mdp_color_enhancement,
