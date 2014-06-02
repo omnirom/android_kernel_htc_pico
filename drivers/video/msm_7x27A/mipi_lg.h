@@ -10,10 +10,12 @@
  * GNU General Public License for more details.
  */
 
-#ifndef MIPI_SIMULATOR_H
-#define MIPI_SIMULATOR_H
+#ifndef MIPI_LG_H
+#define MIPI_LG_H
 
-int mipi_simulator_device_register(struct msm_panel_info *pinfo,
+#define LG_WVGA_TWO_LANE
+
+int mipi_lg_device_register(struct msm_panel_info *pinfo,
 					u32 channel, u32 panel);
 
-#endif  /* MIPI_SIMULATOR_H */
+#endif  /* MIPI_SONY_H */
